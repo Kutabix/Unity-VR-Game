@@ -32,22 +32,22 @@ public class SmartChairCollision : MonoBehaviour
 
     private void OnGrab(SelectEnterEventArgs args)
     {
-        WakeUp(); // aktywuj fizykê i kolizje
+        WakeUp(); 
     }
 
     private void OnRelease(SelectExitEventArgs args)
     {
-        WakeUp(); // fizyka zostaje aktywna
+        WakeUp(); 
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        WakeUp(); // np. strza³, inne cia³o uderzy³o
+        WakeUp(); 
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        WakeUp(); // np. trigger od pocisku itp.
+        WakeUp(); 
     }
 
     private void WakeUp()

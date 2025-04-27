@@ -30,14 +30,9 @@ public class SimpleShoot : MonoBehaviour
             gunAnimator = GetComponentInChildren<Animator>();
     }
 
-    void Update()
+    public void PullTheTrigger()
     {
-        //If you want a different input, change it here
-        if (Input.GetButtonDown("Fire1"))
-        {
-            //Calls animation on the gun that has the relevant animation events that will fire
-            gunAnimator.SetTrigger("Fire");
-        }
+        gunAnimator.SetTrigger("Fire");
     }
 
 
@@ -46,22 +41,22 @@ public class SimpleShoot : MonoBehaviour
     {
         if (muzzleFlashPrefab)
         {
-            //Create the muzzle flash
             GameObject tempFlash;
             tempFlash = Instantiate(muzzleFlashPrefab, barrelLocation.position, barrelLocation.rotation);
-
-            //Destroy the muzzle flash effect
             Destroy(tempFlash, destroyTimer);
         }
 
-        //cancels if there's no bullet prefeb
         if (!bulletPrefab)
         { return; }
 
-        // Create a bullet and add force on it in direction of the barrel
-        Instantiate(bulletPrefab, barrelLocation.position, barrelLocation.rotation).GetComponent<Rigidbody>().AddForce(barrelLocation.forward * shotPower);
+        // Create bullet
+        GameObject tempBullet = Instantiate(bulletPrefab, barrelLocation.position, barrelLocation.rotation);
+        tempBullet.GetComponent<Rigidbody>().AddForce(barrelLocation.forward * shotPower);
 
+        // 🔥 Dodaj to: zniszcz pocisk po czasie (np. 5 sekund)
+        Destroy(tempBullet, 5f);
     }
+
 
     //This function creates a casing at the ejection slot
     void CasingRelease()
