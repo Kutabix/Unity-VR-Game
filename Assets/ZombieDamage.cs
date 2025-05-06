@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class ZombieDamageHandler : MonoBehaviour
 {
@@ -9,6 +10,13 @@ public class ZombieDamageHandler : MonoBehaviour
     void Start()
     {
         animator = GetComponent<Animator>();
+    }
+
+    private IEnumerator DestroyAfterDeath()
+    {
+        yield return new WaitForSeconds(animator.GetCurrentAnimatorStateInfo(0).length);
+
+        Destroy(gameObject);
     }
 
     void OnCollisionEnter(Collision collision)
@@ -23,10 +31,12 @@ public class ZombieDamageHandler : MonoBehaviour
             {
                 isDead = true;
                 animator.SetTrigger("IsDeath");
+                StartCoroutine(DestroyAfterDeath());
             }
             else
             {
                 animator.SetTrigger("TakeDamage");
+
             }
         }
     }
