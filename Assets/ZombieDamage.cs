@@ -3,6 +3,7 @@ using UnityEngine;
 public class ZombieDamageHandler : MonoBehaviour
 {
     private Animator animator;
+    private int health = 100;
 
     void Start()
     {
@@ -13,7 +14,16 @@ public class ZombieDamageHandler : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Bullet"))
         {
-            animator.SetTrigger("TakeDamage");
+            health -= 30;
+
+            if (health > 0 )
+            {
+                animator.SetTrigger("TakeDamage");
+            } else
+            {
+                animator.SetBool("IsAlive", false);
+                Destroy(gameObject, 2f);
+            }
         }
     }
 }
