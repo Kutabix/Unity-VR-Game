@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using System.Collections;
 
 public class GunZombieTrigger : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class GunZombieTrigger : MonoBehaviour
     public GameObject player;
 
     private XRGrabInteractable grab;
-    private bool hasSpawned = false;
+    private bool isSpawning = false;
 
     private void Awake()
     {
@@ -23,10 +24,22 @@ public class GunZombieTrigger : MonoBehaviour
 
     private void OnGrabbed(SelectEnterEventArgs args)
     {
-        if (!hasSpawned) 
+        if (!isSpawning)
+        {
+            StartCoroutine(SpawnZombiesLoop());
+            isSpawning = true;
+        }
+    }
+
+    private IEnumerator SpawnZombiesLoop()
+    {
+        while (true) 
         {
             SpawnZombie();
-            hasSpawned = true; 
+
+            // losowy czas od 6 do 12 sekund
+            float waitTime = Random.Range(3f, 10f);
+            yield return new WaitForSeconds(waitTime);
         }
     }
 

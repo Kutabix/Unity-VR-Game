@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
+using System.Collections;
 
 public class ZombieFollowPlayer : MonoBehaviour
 {
@@ -7,43 +8,100 @@ public class ZombieFollowPlayer : MonoBehaviour
     private NavMeshAgent agent;
     private Animator animator;
 
-    public float stopDistance = 1.5f; // Odleg³oœæ zatrzymania
+    public float stopDistance = 5f;
+    public float attackRange = 1f;
+    public float attackCooldown = 2f;
+
+    private bool isAttacking = false;
+    private Coroutine attackCoroutine;
+
+    private PlayerHealth playerHealth;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
+
+        playerHealth = FindObjectOfType<PlayerHealth>();
+    }
+
+    float GetDistanceToTarget()
+    {
+        Vector3 zombiePos = new Vector3(transform.position.x, 0, transform.position.z);
+        Vector3 playerPos = new Vector3(target.position.x, 0, target.position.z);
+        return Vector3.Distance(zombiePos, playerPos);
     }
 
     void Update()
     {
-        if (target != null)
-        {
-            float distance = Vector3.Distance(transform.position, target.position);
+        float distance = GetDistanceToTarget();
+        Debug.Log($"distance: {distance}, attackRange: {attackRange}");
 
-            if (distance > stopDistance)
+        if (distance > stopDistance)
+        {
+            if (agent.isStopped)
             {
-                if (agent.isStopped)
+                agent.isStopped = false;
+            }
+            agent.SetDestination(target.position);
+
+            StopAttack();
+        }
+        else
+        {
+            if (!agent.isStopped)
+            {
+                agent.isStopped = true;
+                agent.velocity = Vector3.zero;
+            }
+
+            if (distance <= attackRange)
+            {
+                if (!isAttacking)
                 {
-                    agent.isStopped = false;
+                    StartAttack();
                 }
-                agent.SetDestination(target.position);
             }
             else
             {
-                if (!agent.isStopped)
-                {
-                    agent.isStopped = true;
-                    agent.velocity = Vector3.zero; // <--- ZERUJEMY velocity!
-                }
+                StopAttack();
             }
         }
 
-        float speed = agent.velocity.magnitude;
+        animator.SetBool("isWalking", agent.velocity.magnitude > 0.1f);
+    }
 
-        if (animator != null)
+    void StartAttack()
+    {
+        isAttacking = true;
+        attackCoroutine = StartCoroutine(AttackCycle());
+    }
+
+    void StopAttack()
+    {
+        if (isAttacking)
         {
-            animator.SetBool("isWalking", speed > 0.1f);
+            isAttacking = false;
+            if (attackCoroutine != null)
+            {
+                StopCoroutine(attackCoroutine);
+                attackCoroutine = null;
+            }
+        }
+    }
+
+    private IEnumerator AttackCycle()
+    {
+        while (isAttacking)
+        {
+            animator.SetTrigger("Attack");
+
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(3); 
+            }
+
+            yield return new WaitForSeconds(attackCooldown);
         }
     }
 }
